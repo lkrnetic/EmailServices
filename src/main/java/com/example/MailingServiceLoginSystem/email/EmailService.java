@@ -31,6 +31,5 @@ public class EmailService implements EmailSender{
             LOGGER.error("failed to send email", e);
             throw new IllegalStateException("failed to send email");
         }
-
     }
 }

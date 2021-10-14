@@ -28,6 +28,17 @@ public class AppUserService implements UserDetailsService {
     }
     public String signUpUser(AppUser appUser) {
         boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
+        if (appUser.isEnabled() == false) {
+            String token = UUID.randomUUID().toString();
+            ConfirmationToken confirmationToken = new ConfirmationToken(
+                    token,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(15),
+                    appUser
+            );
+            confirmationTokenService.saveConfirmationToken(confirmationToken);
+            return token;
+        }
         if (userExists) {
             throw new IllegalStateException("email already taken");
         }
