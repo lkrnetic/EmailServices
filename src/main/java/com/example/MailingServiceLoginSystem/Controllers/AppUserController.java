@@ -45,7 +45,6 @@ public class AppUserController {
     @PostMapping("/signup")
     public RedirectView createNewAppUser(@RequestParam String firstName , @RequestParam String lastName,
                                          @RequestParam String email , @RequestParam String password){
-        System.out.println(firstName);
         boolean isValidEmail = emailValidator.test(email);
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
@@ -58,10 +57,12 @@ public class AppUserController {
                         password,
                         AppUserRole.USER
                 );
+        /*
         boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
         if (userExists) {
             throw new IllegalStateException("email already taken");
         }
+        */
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken = new ConfirmationToken(
                 token,
@@ -73,9 +74,6 @@ public class AppUserController {
         appUser.setPassword(encodedPassword);
         appUserRepository.save(appUser);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
-        if (userExists) {
-            throw new IllegalStateException("email already taken");
-        }
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
         emailSender.send(
                 email,

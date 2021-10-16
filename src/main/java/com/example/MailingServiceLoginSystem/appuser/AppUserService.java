@@ -22,12 +22,14 @@ public class AppUserService implements UserDetailsService {
     private final static String USER_NOT_FOUND = "User with email %s not found";
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        /*
         return appUserRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
-
+        */
+        return appUserRepository.findByEmail(email);
     }
     public String signUpUser(AppUser appUser) {
-        boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
+        //boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
         if (appUser.isEnabled() == false) {
             String token = UUID.randomUUID().toString();
             ConfirmationToken confirmationToken = new ConfirmationToken(
@@ -39,9 +41,11 @@ public class AppUserService implements UserDetailsService {
             confirmationTokenService.saveConfirmationToken(confirmationToken);
             return token;
         }
+        /*
         if (userExists) {
             throw new IllegalStateException("email already taken");
         }
+        */
         String encodedPassword = bCryptPasswordEncoder.encode(appUser.getPassword());
         appUser.setPassword(encodedPassword);
         appUserRepository.save(appUser);
@@ -58,5 +62,10 @@ public class AppUserService implements UserDetailsService {
     public int enableAppUser(String email) {
         return appUserRepository.enableAppUser(email);
     }
+
+    public AppUser getAppUser(String email) {
+        return appUserRepository.findByEmail(email);
+    }
+
 
 }

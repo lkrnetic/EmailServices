@@ -34,4 +34,10 @@ public class Email {
     )
     private String text;
     private String subject;
+
+    public Email(AppUser appUser, String text, String subject) {
+        this.appUser = appUser;
+        this.text = text;
+        this.subject = subject;
+    }
 }
