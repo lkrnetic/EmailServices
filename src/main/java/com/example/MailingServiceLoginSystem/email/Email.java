@@ -22,12 +22,16 @@ public class Email {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
+    @JoinColumn(
+            nullable = false,
+            name = "app_user_id"
+    )
     private AppUser appUser;
-    private String receiver_email;
+    @Column(
+            name = "text",
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
     private String text;
-    /*
-    @OneToMany
-    private List<EmailReceiver> receivers = new ArrayList<>();
-    */
-
+    private String subject;
 }

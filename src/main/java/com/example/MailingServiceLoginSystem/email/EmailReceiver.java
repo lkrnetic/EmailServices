@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -19,5 +16,12 @@ public class EmailReceiver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String email;
+    @ManyToOne
+    @JoinColumn(
+            nullable = false,
+            name = "email_id"
+    )
+    private Email email;
+    private String receiverEmail;
+
 }
