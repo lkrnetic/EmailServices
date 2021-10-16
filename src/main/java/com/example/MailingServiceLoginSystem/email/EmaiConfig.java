@@ -21,9 +21,9 @@ public class EmaiConfig {
             appUserRepository.saveAll(
                     List.of(john)
             );
-            Email email1 = new Email(john, "blabla", "subject");
-            Email email2 = new Email(john, "blabla2", "subject2");
-            Email email3 = new Email(john, "blabla3", "subject3");
+            Email email1 = new Email(john, "blabla", "subject", "receiver@gmail.com");
+            Email email2 = new Email(john, "blabla2", "subject2", "receiver@gmail.com");
+            Email email3 = new Email(john, "blabla3", "subject3", "receiver@gmail.com");
             emailRepository.saveAll(List.of(email1, email2, email3));
         };
     }

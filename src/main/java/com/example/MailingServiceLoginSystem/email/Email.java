@@ -34,10 +34,12 @@ public class Email {
     )
     private String text;
     private String subject;
+    private String receiver;
 
-    public Email(AppUser appUser, String text, String subject) {
+    public Email(AppUser appUser, String text, String subject, String receiver) {
         this.appUser = appUser;
         this.text = text;
         this.subject = subject;
+        this.receiver = receiver;
     }
 }
