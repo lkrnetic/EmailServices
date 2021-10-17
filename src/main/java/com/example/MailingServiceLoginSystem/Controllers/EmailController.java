@@ -9,6 +9,7 @@ import com.example.MailingServiceLoginSystem.email.EmailSender;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,10 +46,25 @@ public class EmailController {
     public String sendNewEmail(Principal principal, @RequestParam String receiver, String subject, String text)
     {
         AppUser appUser = appUserRepository.findByEmail(principal.getName());
+        /*
         emailSender.send(
                 receiver,
                 text);
+         */
         Email email = new Email(appUser, text,  subject, receiver);
+        int count = StringUtils.countOccurrencesOf(receiver, ";");
+        if (count == 0) {
+            emailSender.send(
+                    receiver,
+                    text);
+        } else {
+            String[] list_of_receivers = receiver.split(";");
+            for(int i = 0; i < list_of_receivers.length; i++) {
+                emailSender.send(
+                        list_of_receivers[i],
+                        text);
+            }
+        }
         emailRepository.save(email);
         return "emails";
     }
