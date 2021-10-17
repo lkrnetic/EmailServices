@@ -29,28 +29,22 @@ public class EmailController {
     public String getEmails(Model model, Principal principal) {
         AppUser appUser = appUserRepository.findByEmail(principal.getName());
         List<Email> emailsList = emailRepository.findByAppUser(appUser);
-        for(int i = 0; i < emailsList.size(); i++) {
-            System.out.println(emailsList.get(i).getText());
-        }
+        model.addAttribute("emails" , emailsList);
         return "emails";
     }
 
     @GetMapping("/email")
-    public String showEmail(@RequestParam Long id)
+    public String showEmail(Model model, @RequestParam Long id)
     {
         Email email = emailRepository.getById(id);
+        model.addAttribute("email" , email);
         return "email";
     }
 
     @PostMapping("/email")
-    public String sendNewEmail(Principal principal, @RequestParam String receiver, String subject, String text)
+    public String sendNewEmail(Principal principal, Model model, @RequestParam String receiver, String subject, String text)
     {
         AppUser appUser = appUserRepository.findByEmail(principal.getName());
-        /*
-        emailSender.send(
-                receiver,
-                text);
-         */
         Email email = new Email(appUser, text,  subject, receiver);
         int count = StringUtils.countOccurrencesOf(receiver, ";");
         if (count == 0) {
@@ -66,6 +60,8 @@ public class EmailController {
             }
         }
         emailRepository.save(email);
+        List<Email> emailsList = emailRepository.findByAppUser(appUser);
+        model.addAttribute("emails" , emailsList);
         return "emails";
     }
 

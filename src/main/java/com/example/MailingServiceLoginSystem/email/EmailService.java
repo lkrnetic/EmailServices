@@ -10,12 +10,14 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class EmailService implements EmailSender{
     private final static Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
+    private final EmailRepository emailRepository;
     @Override
     @Async
     public void send(String to, String email) {
@@ -31,5 +33,9 @@ public class EmailService implements EmailSender{
             LOGGER.error("failed to send email", e);
             throw new IllegalStateException("failed to send email");
         }
+    }
+
+    public List<Email> getAllEmails() {
+        return emailRepository.findAll();
     }
 }
