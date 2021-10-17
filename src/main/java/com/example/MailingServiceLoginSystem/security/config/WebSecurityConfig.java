@@ -22,11 +22,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/","/signup","/login","/api/v*/registration/**")
+                    .antMatchers("/signup","/login","/api/v*/registration/**")
                     .permitAll()
                 .anyRequest()
                 .authenticated().and()
-                .formLogin().loginPage("/login").usernameParameter("email").passwordParameter("password")
+                .formLogin().loginPage("/login").usernameParameter("email").passwordParameter("password").defaultSuccessUrl("/emails", true)
                 .permitAll()
                 .failureUrl("/login-error")
                 .and()

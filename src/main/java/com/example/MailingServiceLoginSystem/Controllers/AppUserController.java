@@ -81,7 +81,7 @@ public class AppUserController {
         //set the login token session
         Authentication authentication = new UsernamePasswordAuthenticationToken(appUser, null , appUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new RedirectView("/");
+        return new RedirectView("/emails");
     }
 
     @GetMapping("/login")
