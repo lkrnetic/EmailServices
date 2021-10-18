@@ -24,6 +24,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -84,6 +85,45 @@ public class AppUserController {
         return new RedirectView("/login");
     }
 
+    @GetMapping("/forgotpassword")
+    public String getForgotPassword(){
+        return "forgotpassword" ;
+    }
+
+    @PostMapping("/forgotpassword")
+    public RedirectView createNewAppUser(@RequestParam String email){
+        AppUser appUser = appUserRepository.findByEmail(email);
+        String forgetPasswordToken = UUID.randomUUID().toString();
+        String link = "http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken;
+        emailSender.send(
+                email,
+                "In order to change your password you must visit this link http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken);
+        appUserRepository.updateForgetPasswordToken(email, forgetPasswordToken);
+        return new RedirectView("/login");
+    }
+
+    @GetMapping("/confirmchangepasswordtoken")
+    public RedirectView confirmChangePasswordToken(@RequestParam String forgetPasswordToken) {
+        AppUser appUser = appUserRepository.findByForgetPasswordToken(forgetPasswordToken);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(appUser, null , appUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return new RedirectView("/changepassword");
+    }
+
+    @GetMapping("/changepassword")
+    public String getChangePassword(){
+        return "changepassword" ;
+    }
+
+    @PostMapping("/changepassword")
+    public RedirectView postChangepassword(@RequestParam String password, Principal principal) {
+        AppUser appUser = appUserRepository.findByEmail(principal.getName());
+        String encodedPassword = bCryptPasswordEncoder.encode(password);
+        appUser.setPassword(encodedPassword);
+        appUserRepository.updatePassword(appUser.getEmail(), appUser.getPassword());
+        return new RedirectView("/emails");
+    }
+
     @GetMapping("/login")
     public String getLoginPage(){
         return "login" ;
@@ -114,9 +154,9 @@ public class AppUserController {
 
 
     @GetMapping("/confirm")
-    public String confirm(@RequestParam("token") String token) {
-         appUserService.confirmToken(token);
-         return "emails";
+    public RedirectView  confirm(@RequestParam("token") String token) {
+        appUserService.confirmToken(token);
+        return new RedirectView("/emails");
     }
 
     private String buildEmail(String name, String link) {

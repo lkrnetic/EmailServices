@@ -29,6 +29,7 @@ public class AppUserService implements UserDetailsService {
         */
         return appUserRepository.findByEmail(email);
     }
+
     public String signUpUser(AppUser appUser) {
         //boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
         if (appUser.isEnabled() == false) {
@@ -89,5 +90,4 @@ public class AppUserService implements UserDetailsService {
         enableAppUser(
                 confirmationToken.getAppUser().getEmail());
     }
-
 }

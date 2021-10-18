@@ -12,9 +12,23 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     AppUser findByEmail(String email);
+    AppUser findByForgetPasswordToken(String forgetPasswordToken);
     @Transactional
     @Modifying
     @Query("UPDATE AppUser a " +
             "SET a.enabled = TRUE WHERE a.email = ?1")
     int enableAppUser(String email);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE AppUser a " +
+            "SET a.password = ?2 WHERE a.email = ?1")
+    int updatePassword(String email, String password);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE AppUser a " +
+            "SET a.forgetPasswordToken = ?2 WHERE a.email = ?1")
+    int updateForgetPasswordToken(String email, String forgetPasswordToken);
+
 }
