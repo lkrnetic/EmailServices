@@ -71,4 +71,14 @@ public class EmailController {
         return "newemail";
     }
 
+    @PostMapping("/deleteEmail")
+    public String deleteEmail(Principal principal, Model model, @RequestParam Long id)
+    {
+        AppUser appUser = appUserRepository.findByEmail(principal.getName());
+        emailRepository.deleteById(id);
+        List<Email> emailsList = emailRepository.findByAppUser(appUser);
+        model.addAttribute("emails" , emailsList);
+        return "emails";
+    }
+
 }

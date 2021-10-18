@@ -1,4 +1,4 @@
-package com.example.MailingServiceLoginSystem.registration.token;
+package com.example.MailingServiceLoginSystem.token;
 
 import com.example.MailingServiceLoginSystem.appuser.AppUser;
 import lombok.AllArgsConstructor;

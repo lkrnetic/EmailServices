@@ -1,13 +1,14 @@
 package com.example.MailingServiceLoginSystem.appuser;
 
-import com.example.MailingServiceLoginSystem.registration.token.ConfirmationToken;
-import com.example.MailingServiceLoginSystem.registration.token.ConfirmationTokenService;
+import com.example.MailingServiceLoginSystem.token.ConfirmationToken;
+import com.example.MailingServiceLoginSystem.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -67,5 +68,26 @@ public class AppUserService implements UserDetailsService {
         return appUserRepository.findByEmail(email);
     }
 
+    @Transactional
+    public void confirmToken(String token) {
+        ConfirmationToken confirmationToken = confirmationTokenService
+                .getToken(token)
+                .orElseThrow(() ->
+                        new IllegalStateException("token not found"));
+
+        if (confirmationToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("email already confirmed");
+        }
+
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("token expired");
+        }
+
+        confirmationTokenService.setConfirmedAt(token);
+        enableAppUser(
+                confirmationToken.getAppUser().getEmail());
+    }
 
 }

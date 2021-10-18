@@ -5,12 +5,10 @@ import com.example.MailingServiceLoginSystem.appuser.AppUserRepository;
 import com.example.MailingServiceLoginSystem.appuser.AppUserRole;
 import com.example.MailingServiceLoginSystem.appuser.AppUserService;
 import com.example.MailingServiceLoginSystem.email.EmailSender;
-import com.example.MailingServiceLoginSystem.registration.EmailValidator;
-import com.example.MailingServiceLoginSystem.registration.RegistrationService;
-import com.example.MailingServiceLoginSystem.registration.token.ConfirmationToken;
-import com.example.MailingServiceLoginSystem.registration.token.ConfirmationTokenService;
+import com.example.MailingServiceLoginSystem.email.EmailValidator;
+import com.example.MailingServiceLoginSystem.token.ConfirmationToken;
+import com.example.MailingServiceLoginSystem.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,10 +31,12 @@ import java.util.UUID;
 @Controller
 public class AppUserController {
     private final AppUserRepository appUserRepository;
+    private final AppUserService appUserService;
     private final EmailValidator emailValidator;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
+
     @GetMapping("/signup")
     public String getSignupPage(){
         return "signup" ;
@@ -74,14 +74,14 @@ public class AppUserController {
         appUser.setPassword(encodedPassword);
         appUserRepository.save(appUser);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
-        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        String link = "http://localhost:8080/confirm?token=" + token;
         emailSender.send(
                 email,
                 buildEmail(firstName, link));
         //set the login token session
         Authentication authentication = new UsernamePasswordAuthenticationToken(appUser, null , appUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new RedirectView("/emails");
+        return new RedirectView("/login");
     }
 
     @GetMapping("/login")
@@ -113,7 +113,11 @@ public class AppUserController {
     }
 
 
-
+    @GetMapping("/confirm")
+    public String confirm(@RequestParam("token") String token) {
+         appUserService.confirmToken(token);
+         return "emails";
+    }
 
     private String buildEmail(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +

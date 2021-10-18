@@ -1,4 +1,4 @@
-package com.example.MailingServiceLoginSystem.registration.token;
+package com.example.MailingServiceLoginSystem.token;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import java.util.Optional;
 public class ConfirmationTokenService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
 
-    public void saveConfirmationToken(ConfirmationToken token) {
+    public void saveConfirmationToken(com.example.MailingServiceLoginSystem.token.ConfirmationToken token) {
         confirmationTokenRepository.save(token);
     }
 

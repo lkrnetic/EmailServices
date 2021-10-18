@@ -2,7 +2,7 @@
 
 <div class = "container">
     <h2 class="my-3">Emails Table</h2>
-
+    <a href="/newEmail" class="btn btn-success" role="button">New email</a>
     <table class="table table-striped">
         <thead>
             <th scope="col">Subject</th>
@@ -19,7 +19,10 @@
                     <input type="hidden" name="id" th:value="${email.getId()}">
                 </form>
             </td>
-            <td th:text="${email.getReceiver()}" ></td>
+            <td><form th:action="@{/deleteEmail}" method="post">
+                <button class="btn btn-danger" type="submit">Delete</button>
+                <input type="hidden" name="id" th:value="${email.getId()}">
+            </form></td>
         </tr>
         </tbody>
     </table>
