@@ -27,18 +27,20 @@ public class AppUser implements UserDetails {
     private String email;
     private String password;
     private String forgetPasswordToken;
+    private String accountActivationToken;
     @Enumerated(EnumType.STRING)
     private AppUserRole appUserRole;
     private Boolean locked = false;
     private Boolean enabled = false;
 
 
-    public AppUser(String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
+    public AppUser(String firstName, String lastName, String email, String password, AppUserRole appUserRole, String accountActivationToken) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.appUserRole = appUserRole;
+        this.accountActivationToken = accountActivationToken;
     }
 
     public AppUser(String firstName, String lastName, String email, String password, AppUserRole appUserRole, Boolean enabled) {

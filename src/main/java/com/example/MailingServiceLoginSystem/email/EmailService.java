@@ -20,14 +20,14 @@ public class EmailService implements EmailSender{
     private final EmailRepository emailRepository;
     @Override
     @Async
-    public void send(String to, String email) {
+    public void send(String to, String email, String subject, String sender) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(email, true);
             helper.setTo(to);
-            helper.setSubject("Confirm your email");
-            helper.setFrom("hello@amigoscode.com");
+            helper.setSubject(subject);
+            helper.setFrom(sender);
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             LOGGER.error("failed to send email", e);

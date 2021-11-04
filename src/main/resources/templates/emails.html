@@ -1,8 +1,9 @@
 <div th:replace="fragments/header"></div>
 
 <div class = "container">
+    <div class="alert alert-success mt-2" role="alert" th:if="${emailWasSent}" th:text="${emailWasSent}"></div>
     <h2 class="my-3">Emails Table</h2>
-    <a href="/newEmail" class="btn btn-success" role="button">New email</a>
+    <a href="/newemail" class="btn btn-success" role="button">New email</a>
     <table class="table table-striped">
         <thead>
             <th scope="col">Subject</th>

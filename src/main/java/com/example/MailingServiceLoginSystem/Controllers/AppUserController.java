@@ -6,8 +6,6 @@ import com.example.MailingServiceLoginSystem.appuser.AppUserRole;
 import com.example.MailingServiceLoginSystem.appuser.AppUserService;
 import com.example.MailingServiceLoginSystem.email.EmailSender;
 import com.example.MailingServiceLoginSystem.email.EmailValidator;
-import com.example.MailingServiceLoginSystem.token.ConfirmationToken;
-import com.example.MailingServiceLoginSystem.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -35,7 +34,6 @@ public class AppUserController {
     private final AppUserService appUserService;
     private final EmailValidator emailValidator;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
     @GetMapping("/signup")
@@ -45,44 +43,38 @@ public class AppUserController {
 
     @PostMapping("/signup")
     public RedirectView createNewAppUser(@RequestParam String firstName , @RequestParam String lastName,
-                                         @RequestParam String email , @RequestParam String password){
+                                         @RequestParam String email , @RequestParam String password, Model model){
         boolean isValidEmail = emailValidator.test(email);
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
         }
-        AppUser appUser =
-                new AppUser(
-                        firstName,
-                        lastName,
-                        email,
-                        password,
-                        AppUserRole.USER
-                );
-        /*
-        boolean userExists = appUserRepository.findByEmail(appUser.getEmail()).isPresent();
-        if (userExists) {
+        AppUser appUser = appUserRepository.findByEmail(email);
+        String accountActivationToken = UUID.randomUUID().toString();
+        if (appUser != null) {
             throw new IllegalStateException("email already taken");
+        } else {
+            appUser =
+                    new AppUser(
+                            firstName,
+                            lastName,
+                            email,
+                            password,
+                            AppUserRole.USER,
+                            accountActivationToken
+                    );
         }
-        */
-        String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                appUser
-        );
         String encodedPassword = bCryptPasswordEncoder.encode(appUser.getPassword());
         appUser.setPassword(encodedPassword);
         appUserRepository.save(appUser);
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
-        String link = "http://localhost:8080/confirm?token=" + token;
+        String link = "http://localhost:8080/accountActivation?token=" + accountActivationToken;
         emailSender.send(
                 email,
-                buildEmail(firstName, link));
+                buildEmail(firstName, link), "Activation link","EmailServices.com");
         //set the login token session
         Authentication authentication = new UsernamePasswordAuthenticationToken(appUser, null , appUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new RedirectView("/login");
+        model.addAttribute("successfulAccountCreation", "Account was successfully created. In order to login, you must activate account.");
+        return new RedirectView("/login?message=accountWasCreated");
     }
 
     @GetMapping("/forgotpassword")
@@ -97,9 +89,10 @@ public class AppUserController {
         String link = "http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken;
         emailSender.send(
                 email,
-                "In order to change your password you must visit this link http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken);
+                "In order to change your password you must visit this link http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken,
+                "Forget password", "EmailServices.com");
         appUserRepository.updateForgetPasswordToken(email, forgetPasswordToken);
-        return new RedirectView("/login");
+        return new RedirectView("/login?message=emailForForgetPasswordWasSent");
     }
 
     @GetMapping("/confirmchangepasswordtoken")
@@ -125,7 +118,15 @@ public class AppUserController {
     }
 
     @GetMapping("/login")
-    public String getLoginPage(){
+    public String getLoginPage(@RequestParam("message") Optional<String> message, Model model){
+        if(!message.isEmpty()) {
+            if (message.equals(Optional.of("accountWasCreated"))) {
+                model.addAttribute("successfulAccountCreation", "Account was successfully created. In order to login, account must be activated. Email with activation link was sent to your email.");
+            }
+            if (message.equals(Optional.of("emailForForgetPasswordWasSent"))) {
+                model.addAttribute("emailForForgetPasswordWasSent", "In order to change password, please visit link that was sent to your email.");
+            }
+        }
         return "login" ;
     }
 
@@ -153,9 +154,13 @@ public class AppUserController {
     }
 
 
-    @GetMapping("/confirm")
+    @GetMapping("/accountActivation")
     public RedirectView  confirm(@RequestParam("token") String token) {
-        appUserService.confirmToken(token);
+        AppUser appUser = appUserRepository.findByAccountActivationToken(token);
+        if (appUser == null) {
+            throw new IllegalStateException("Requested token doesn't exist");
+        }
+        appUserRepository.enableAppUser(appUser.getEmail());
         return new RedirectView("/emails");
     }
 

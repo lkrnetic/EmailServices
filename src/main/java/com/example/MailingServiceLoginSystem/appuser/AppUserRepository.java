@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     AppUser findByEmail(String email);
     AppUser findByForgetPasswordToken(String forgetPasswordToken);
+    AppUser findByAccountActivationToken(String accountActivationToken);
+
     @Transactional
     @Modifying
     @Query("UPDATE AppUser a " +

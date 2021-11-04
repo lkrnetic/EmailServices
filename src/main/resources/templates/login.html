@@ -2,10 +2,12 @@
 <div class = "container">
     <h2 class ="my-4">Login</h2>
     <form th:action="@{/login}"  method="post">
-        <div class="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        <div class="alert alert-danger" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        <div class="alert alert-success" role="alert" th:if="${successfulAccountCreation}" th:text="${successfulAccountCreation}"></div>
+        <div class="alert alert-success" role="alert" th:if="${emailForForgetPasswordWasSent}" th:text="${emailForForgetPasswordWasSent}"></div>
         <div class="form-group">
             <label>Email address</label>
-            <input name="email" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Enter first name">
+            <input name="email" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
         </div>
         <div class="form-group my-2">
             <label for="exampleInputPassword1">Password</label>
