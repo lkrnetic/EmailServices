@@ -67,9 +67,11 @@ public class AppUserController {
         appUser.setPassword(encodedPassword);
         appUserRepository.save(appUser);
         String link = "http://localhost:8080/accountActivation?token=" + accountActivationToken;
+
         emailSender.send(
                 email,
-                buildEmail(firstName, link), "Activation link","EmailServices.com");
+                buildEmail(firstName, link), "Activation link","emailservices@gmail.com");
+
         //set the login token session
         Authentication authentication = new UsernamePasswordAuthenticationToken(appUser, null , appUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -90,7 +92,7 @@ public class AppUserController {
         emailSender.send(
                 email,
                 "In order to change your password you must visit this link http://localhost:8080/confirmchangepasswordtoken?forgetPasswordToken=" + forgetPasswordToken,
-                "Forget password", "EmailServices.com");
+                "Forget password", "emailserivces.com@gmail.com");
         appUserRepository.updateForgetPasswordToken(email, forgetPasswordToken);
         return new RedirectView("/login?message=emailForForgetPasswordWasSent");
     }
@@ -155,7 +157,7 @@ public class AppUserController {
 
 
     @GetMapping("/accountActivation")
-    public RedirectView  confirm(@RequestParam("token") String token) {
+    public RedirectView confirm(@RequestParam("token") String token) {
         AppUser appUser = appUserRepository.findByAccountActivationToken(token);
         if (appUser == null) {
             throw new IllegalStateException("Requested token doesn't exist");
